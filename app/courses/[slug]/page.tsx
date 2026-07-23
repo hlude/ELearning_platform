@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
+import Link from "next/link";
 
 type Lesson = { id: string; title: string; type: string; durationSec: number | null };
 type Module = { id: string; title: string; lessons: Lesson[] };
@@ -155,6 +156,9 @@ export default function CourseDetailPage() {
       </p>
       <h1 className="text-3xl font-bold text-gray-900 mb-2">{course.title}</h1>
       <p className="text-gray-500 mb-2">Taught by {course.instructor.name}</p>
+      <Link href={`/courses/${slug}/forum`} className="text-sm text-gray-900 underline hover:no-underline">
+        💬 Discussion
+      </Link>
 
       {reviews.length > 0 && (
         <div className="flex items-center gap-1 mb-4">
