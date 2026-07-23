@@ -3,19 +3,8 @@
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 
-type Lesson = {
-  id: string;
-  title: string;
-  type: string;
-  durationSec: number | null;
-};
-
-type Module = {
-  id: string;
-  title: string;
-  lessons: Lesson[];
-};
-
+type Lesson = { id: string; title: string; type: string; durationSec: number | null };
+type Module = { id: string; title: string; lessons: Lesson[] };
 type Course = {
   id: string;
   title: string;
@@ -24,6 +13,13 @@ type Course = {
   category: string;
   instructor: { name: string; bio: string | null };
   modules: Module[];
+};
+type Review = {
+  id: string;
+  rating: number;
+  comment: string | null;
+  createdAt: string;
+  student: { name: string };
 };
 
 export default function CourseDetailPage() {
@@ -38,20 +34,35 @@ export default function CourseDetailPage() {
 
   const [progress, setProgress] = useState<Record<string, boolean>>({});
 
-  useEffect(() => {
-    async function fetchCourse() {
-      try {
-        const res = await fetch(`/api/courses/${slug}`);
-        const data = await res.json();
-        if (!res.ok) { setError(data.error ?? "Course not found."); return; }
-        setCourse(data.course);
-      } catch (err) {
-        setError("Something went wrong loading this course.");
-      } finally {
-        setLoading(false);
-      }
-    }
+  const [reviews, setReviews] = useState<Review[]>([]);
+  const [averageRating, setAverageRating] = useState(0);
+  const [myRating, setMyRating] = useState(0);
+  const [myComment, setMyComment] = useState("");
+  const [submittingReview, setSubmittingReview] = useState(false);
 
+  async function fetchCourse() {
+    try {
+      const res = await fetch(`/api/courses/${slug}`);
+      const data = await res.json();
+      if (!res.ok) { setError(data.error ?? "Course not found."); return; }
+      setCourse(data.course);
+    } catch (err) {
+      setError("Something went wrong loading this course.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function fetchReviews() {
+    try {
+      const res = await fetch(`/api/courses/${slug}/reviews`);
+      const data = await res.json();
+      setReviews(data.reviews ?? []);
+      setAverageRating(data.average ?? 0);
+    } catch (err) {}
+  }
+
+  useEffect(() => {
     async function checkEnrollment() {
       try {
         const res = await fetch(`/api/courses/${slug}/enroll`);
@@ -72,6 +83,7 @@ export default function CourseDetailPage() {
       fetchCourse();
       checkEnrollment();
       fetchProgress();
+      fetchReviews();
     }
   }, [slug]);
 
@@ -104,14 +116,35 @@ export default function CourseDetailPage() {
     }
   }
 
+  async function handleSubmitReview(e: React.FormEvent) {
+    e.preventDefault();
+    if (myRating === 0) { alert("Please select a star rating."); return; }
+    setSubmittingReview(true);
+    try {
+      const res = await fetch(`/api/courses/${slug}/reviews`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ rating: myRating, comment: myComment }),
+      });
+      const data = await res.json();
+      if (!res.ok) { alert(data.error ?? "Failed to submit review."); return; }
+      setMyRating(0);
+      setMyComment("");
+      fetchReviews();
+    } catch (err) {
+      alert("Something went wrong.");
+    } finally {
+      setSubmittingReview(false);
+    }
+  }
+
   if (loading) return <p className="text-center text-gray-500 mt-24">Loading course...</p>;
   if (error) return <p className="text-center text-red-600 mt-24">{error}</p>;
   if (!course) return null;
 
   const totalLessons = course.modules.reduce((sum, m) => sum + m.lessons.length, 0);
   const completedLessons = course.modules.reduce(
-    (sum, m) => sum + m.lessons.filter((l) => progress[l.id]).length,
-    0
+    (sum, m) => sum + m.lessons.filter((l) => progress[l.id]).length, 0
   );
   const progressPercent = totalLessons > 0 ? Math.round((completedLessons / totalLessons) * 100) : 0;
 
@@ -121,7 +154,14 @@ export default function CourseDetailPage() {
         {course.category}
       </p>
       <h1 className="text-3xl font-bold text-gray-900 mb-2">{course.title}</h1>
-      <p className="text-gray-500 mb-4">Taught by {course.instructor.name}</p>
+      <p className="text-gray-500 mb-2">Taught by {course.instructor.name}</p>
+
+      {reviews.length > 0 && (
+        <div className="flex items-center gap-1 mb-4">
+          <span className="text-yellow-500">{"★".repeat(Math.round(averageRating))}{"☆".repeat(5 - Math.round(averageRating))}</span>
+          <span className="text-sm text-gray-600">{averageRating} ({reviews.length} review{reviews.length !== 1 ? "s" : ""})</span>
+        </div>
+      )}
 
       <p className="text-gray-700 mb-4">{course.description}</p>
       <p className="text-2xl font-bold text-gray-900 mb-4">
@@ -157,10 +197,7 @@ export default function CourseDetailPage() {
             <span>{progressPercent}%</span>
           </div>
           <div className="w-full bg-gray-200 rounded-full h-2">
-            <div
-              className="bg-gray-900 h-2 rounded-full transition-all"
-              style={{ width: `${progressPercent}%` }}
-            />
+            <div className="bg-gray-900 h-2 rounded-full transition-all" style={{ width: `${progressPercent}%` }} />
           </div>
         </div>
       )}
@@ -189,6 +226,62 @@ export default function CourseDetailPage() {
                 </li>
               ))}
             </ul>
+          </div>
+        ))}
+      </div>
+
+      {/* Reviews Section */}
+      <h2 className="text-xl font-bold text-gray-900 mt-10 mb-3">Reviews</h2>
+
+      {enrolled && (
+        <div className="bg-white border border-gray-200 rounded-xl p-5 mb-6">
+          <p className="font-semibold text-gray-900 mb-2">Leave a review</p>
+          <form onSubmit={handleSubmitReview}>
+            <div className="flex gap-1 mb-3">
+              {[1, 2, 3, 4, 5].map((star) => (
+                <button
+                  key={star}
+                  type="button"
+                  onClick={() => setMyRating(star)}
+                  className={`text-2xl ${star <= myRating ? "text-yellow-500" : "text-gray-300"}`}
+                >
+                  ★
+                </button>
+              ))}
+            </div>
+            <textarea
+              value={myComment}
+              onChange={(e) => setMyComment(e.target.value)}
+              placeholder="Share your thoughts about this course (optional)"
+              rows={3}
+              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm mb-3 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent"
+            />
+            <button
+              type="submit"
+              disabled={submittingReview}
+              className="bg-gray-900 text-white rounded-lg px-4 py-2 text-sm font-medium hover:bg-gray-800 transition-colors disabled:opacity-50"
+            >
+              {submittingReview ? "Submitting..." : "Submit Review"}
+            </button>
+          </form>
+        </div>
+      )}
+
+      {reviews.length === 0 && <p className="text-gray-500">No reviews yet.</p>}
+
+      <div className="space-y-3">
+        {reviews.map((review) => (
+          <div key={review.id} className="bg-white border border-gray-200 rounded-xl p-4">
+            <div className="flex items-center justify-between mb-1">
+              <p className="font-semibold text-gray-900">{review.student.name}</p>
+              <span className="text-yellow-500 text-sm">
+                {"★".repeat(review.rating)}{"☆".repeat(5 - review.rating)}
+              </span>
+            </div>
+            {review.comment && <p className="text-gray-600 text-sm">{review.comment}</p>}
+            <p className="text-xs text-gray-400 mt-1">
+              {new Date(review.createdAt).toLocaleDateString()}
+            </p>
           </div>
         ))}
       </div>
