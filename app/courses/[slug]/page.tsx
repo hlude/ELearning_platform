@@ -88,10 +88,20 @@ export default function CourseDetailPage() {
     }
   }, [slug]);
 
-  async function handleEnroll() {
+async function handleEnroll() {
     setEnrolling(true);
     setEnrollError(null);
     try {
+      const isPaid = Number(course?.price) > 0;
+
+      if (isPaid) {
+        const res = await fetch(`/api/courses/${slug}/checkout`, { method: "POST" });
+        const data = await res.json();
+        if (!res.ok) { setEnrollError(data.error ?? "Failed to start checkout."); setEnrolling(false); return; }
+        window.location.href = data.url;
+        return;
+      }
+
       const res = await fetch(`/api/courses/${slug}/enroll`, { method: "POST" });
       const data = await res.json();
       if (!res.ok) { setEnrollError(data.error ?? "Failed to enroll."); return; }
@@ -102,7 +112,6 @@ export default function CourseDetailPage() {
       setEnrolling(false);
     }
   }
-
   async function toggleLessonComplete(lessonId: string, currentlyCompleted: boolean) {
     setProgress((prev) => ({ ...prev, [lessonId]: !currentlyCompleted }));
     try {
@@ -205,7 +214,14 @@ export default function CourseDetailPage() {
           </div>
         </div>
       )}
-
+{enrolled && progressPercent === 100 && (
+  <Link
+    href={`/courses/${slug}/certificate`}
+    className="inline-block bg-yellow-500 text-white rounded-lg px-4 py-2 text-sm font-medium hover:bg-yellow-600 transition-colors mb-4"
+  >
+    🎓 Get Your Certificate
+  </Link>
+)}
       {course.modules.length === 0 && <p className="text-gray-500">No modules added yet.</p>}
 
       <div className="space-y-4">

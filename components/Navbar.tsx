@@ -4,28 +4,31 @@ import Link from "next/link";
 
 export default function Navbar() {
   return (
-    <nav className="border-b border-gray-200 bg-white">
+    <nav className="border-b border-blue-200 bg-blue-50">
       <div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
-        <Link href="/" className="text-xl font-bold text-gray-900">
+        <Link href="/" className="text-xl font-bold text-blue-950">
           EduPlatform
         </Link>
 
-        <div className="flex items-center gap-6 text-sm font-medium text-gray-600">
-          <Link href="/courses" className="hover:text-gray-900 transition-colors">
+        <div className="flex items-center gap-6 text-sm font-medium text-blue-700">
+          <Link href="/courses" className="hover:text-blue-950 transition-colors">
             Courses
           </Link>
-          <Link href="/dashboard" className="hover:text-gray-900 transition-colors">
+          <Link href="/dashboard" className="hover:text-blue-950 transition-colors">
             My Courses
+          </Link>
+          <Link href="/instructor/analytics" className="hover:text-blue-950 transition-colors">
+            Analytics
           </Link>
           <Link
             href="/login"
-            className="text-gray-600 hover:text-gray-900 transition-colors"
+            className="text-blue-700 hover:text-blue-950 transition-colors"
           >
             Log in
           </Link>
           <Link
             href="/register"
-            className="bg-gray-900 text-white px-4 py-2 rounded-lg hover:bg-gray-800 transition-colors"
+            className="bg-blue-900 text-white px-4 py-2 rounded-lg hover:bg-blue-800 transition-colors"
           >
             Sign up
           </Link>
