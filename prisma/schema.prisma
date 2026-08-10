@@ -86,6 +86,16 @@ model Course {
   createdAt     DateTime     @default(now())
   updatedAt     DateTime     @updatedAt
 
+  // New fields for richer course cards/detail pages
+  subtitle       String?
+  level          String?
+  language       String?
+  bestseller     Boolean  @default(false)
+  discountPrice  Decimal? @db.Decimal(10, 2)
+  tags           String[] @default([])
+  requirements   String[] @default([])
+  whatYouLearn   String[] @default([])
+
   modules       Module[]
   enrollments   Enrollment[]
   reviews       Review[]
@@ -95,7 +105,6 @@ model Course {
   @@index([category])
   @@index([instructorId])
 }
-
 model Module {
   id        String   @id @default(uuid())
   title     String
