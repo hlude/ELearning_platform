@@ -1,34 +1,40 @@
-import { NextRequest, NextResponse } from "next/server";
-import { jwtVerify } from "jose";
+import { NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
 
-const PROTECTED_PATHS = ["/dashboard", "/instructor", "/admin"];
+const allowedOrigins = [
+  'https://tutorly-visions.lovable.app',
+  'https://id-preview--6f9b4a21-6c52-4265-bf18-f5b99293cc86.lovable.app',
+  // Add your local development origin if needed:
+  'http://localhost:5173',
+  'http://localhost:3000',
+];
 
-export async function middleware(req: NextRequest) {
-  const { pathname } = req.nextUrl;
+export function middleware(request: NextRequest) {
+  const origin = request.headers.get('origin');
+  const response = NextResponse.next();
 
-  const isProtected = PROTECTED_PATHS.some((path) =>
-    pathname.startsWith(path)
-  );
-
-  if (!isProtected) {
-    return NextResponse.next();
+  // Check if the incoming origin is allowed
+  if (origin && allowedOrigins.includes(origin)) {
+    response.headers.set('Access-Control-Allow-Origin', origin);
+    response.headers.set('Access-Control-Allow-Credentials', 'true');
+    response.headers.set(
+      'Access-Control-Allow-Methods',
+      'GET, POST, PUT, DELETE, OPTIONS, PATCH'
+    );
+    response.headers.set(
+      'Access-Control-Allow-Headers',
+      'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version'
+    );
   }
 
-  const token = req.cookies.get("token")?.value;
-
-  if (!token) {
-    return NextResponse.redirect(new URL("/login", req.url));
+  // Handle preflight OPTIONS requests
+  if (request.method === 'OPTIONS') {
+    return new NextResponse(null, { status: 204, headers: response.headers });
   }
 
-  try {
-    const secret = new TextEncoder().encode(process.env.JWT_SECRET);
-    await jwtVerify(token, secret);
-    return NextResponse.next();
-  } catch (err) {
-    return NextResponse.redirect(new URL("/login", req.url));
-  }
+  return response;
 }
 
 export const config = {
-  matcher: ["/dashboard/:path*", "/instructor/:path*", "/admin/:path*"],
+  matcher: '/api/:path*',
 };
