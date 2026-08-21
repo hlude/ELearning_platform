@@ -45,26 +45,22 @@ export default function TakeQuizPage() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!quiz) return;
-
     if (Object.keys(selectedAnswers).length < quiz.questions.length) {
       alert("Please answer all questions before submitting.");
       return;
     }
-
     setSubmitting(true);
     try {
       const answers = Object.entries(selectedAnswers).map(([questionId, selectedOptionId]) => ({
         questionId,
         selectedOptionId,
       }));
-
       const res = await fetch(`/api/quizzes/${quizId}/attempt`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ answers }),
       });
       const data = await res.json();
-
       if (!res.ok) { alert(data.error ?? "Failed to submit quiz."); return; }
       setResult(data);
     } catch (err) {
@@ -74,20 +70,20 @@ export default function TakeQuizPage() {
     }
   }
 
-  if (loading) return <p className="text-center text-gray-500 mt-24">Loading quiz...</p>;
+  if (loading) return <p className="text-center text-[#14213D]/50 mt-24">Loading quiz...</p>;
   if (error) return <p className="text-center text-red-600 mt-24">{error}</p>;
   if (!quiz) return null;
 
   if (result) {
     return (
       <div className="max-w-md mx-auto px-6 py-24 text-center">
-        <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-8">
+        <div className="bg-white border-2 border-[#14213D]/10 rounded-2xl shadow-sm p-8">
           <div className="text-4xl mb-2">{result.passed ? "🎉" : "📝"}</div>
-          <h1 className="text-xl font-bold text-gray-900 mb-2">
+          <h1 className="font-[family-name:var(--font-display)] text-xl font-semibold text-[#14213D] mb-2">
             {result.passed ? "You passed!" : "Keep practicing"}
           </h1>
-          <p className="text-3xl font-bold text-gray-900 mb-1">{result.score}%</p>
-          <p className="text-gray-500 mb-4">
+          <p className="text-3xl font-bold text-[#14213D] mb-1">{result.score}%</p>
+          <p className="text-[#14213D]/50">
             {result.correctCount}/{result.total} correct · Passing score: {quiz.passScore}%
           </p>
         </div>
@@ -97,23 +93,25 @@ export default function TakeQuizPage() {
 
   return (
     <div className="max-w-2xl mx-auto px-6 py-12">
-      <h1 className="text-2xl font-bold text-gray-900 mb-1">{quiz.lesson.title}</h1>
-      <p className="text-gray-500 mb-6">Passing score: {quiz.passScore}%</p>
+      <h1 className="font-[family-name:var(--font-display)] text-2xl font-semibold text-[#14213D] mb-1">
+        {quiz.lesson.title}
+      </h1>
+      <p className="text-[#14213D]/50 mb-6">Passing score: {quiz.passScore}%</p>
 
       <form onSubmit={handleSubmit} className="space-y-4">
         {quiz.questions.map((question, qIndex) => (
-          <div key={question.id} className="bg-white border border-gray-200 rounded-xl p-5">
-            <p className="font-semibold text-gray-900 mb-3">
+          <div key={question.id} className="bg-white border-2 border-[#14213D]/10 rounded-2xl p-5">
+            <p className="font-semibold text-[#14213D] mb-3">
               {qIndex + 1}. {question.text}
             </p>
             <div className="space-y-2">
               {question.options.map((option) => (
                 <label
                   key={option.id}
-                  className={`flex items-center gap-2 px-3 py-2 rounded-lg border cursor-pointer transition-colors ${
+                  className={`flex items-center gap-2 px-3 py-2 rounded-lg border-2 cursor-pointer transition-colors ${
                     selectedAnswers[question.id] === option.id
-                      ? "border-gray-900 bg-gray-50"
-                      : "border-gray-200 hover:bg-gray-50"
+                      ? "border-[#F2B705] bg-[#F2B705]/10"
+                      : "border-[#14213D]/10 hover:bg-[#14213D]/5"
                   }`}
                 >
                   <input
@@ -121,9 +119,9 @@ export default function TakeQuizPage() {
                     name={question.id}
                     checked={selectedAnswers[question.id] === option.id}
                     onChange={() => selectAnswer(question.id, option.id)}
-                    className="w-4 h-4 text-gray-900 focus:ring-gray-900"
+                    className="w-4 h-4 text-[#14213D] focus:ring-[#F2B705]"
                   />
-                  <span className="text-gray-700">{option.text}</span>
+                  <span className="text-[#14213D]/80">{option.text}</span>
                 </label>
               ))}
             </div>
@@ -133,7 +131,7 @@ export default function TakeQuizPage() {
         <button
           type="submit"
           disabled={submitting}
-          className="bg-gray-900 text-white rounded-lg px-6 py-2.5 font-medium hover:bg-gray-800 transition-colors disabled:opacity-50"
+          className="bg-[#14213D] text-white rounded-full px-6 py-3 font-semibold hover:bg-[#1f2f57] transition-colors disabled:opacity-50"
         >
           {submitting ? "Submitting..." : "Submit Quiz"}
         </button>

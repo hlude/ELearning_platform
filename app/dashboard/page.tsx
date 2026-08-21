@@ -1,87 +1,136 @@
-
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
 
-type Enrollment = {
-  id: string;
-  status: string;
-  enrolledAt: string;
-  course: {
-    id: string;
-    title: string;
-    slug: string;
-    category: string;
-    instructor: { name: string };
-  };
-};
-
-export default function DashboardPage() {
-  const [enrollments, setEnrollments] = useState<Enrollment[]>([]);
-  const [loading, setLoading] = useState(true);
+export default function RegisterPage() {
+  const [form, setForm] = useState({ name: "", email: "", password: "", role: "STUDENT" });
   const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState(false);
 
-  useEffect(() => {
-    async function fetchEnrollments() {
-      try {
-        const res = await fetch("/api/enrollments/me");
-        const data = await res.json();
-        if (!res.ok) { setError(data.error ?? "Failed to load your courses."); return; }
-        setEnrollments(data.enrollments);
-      } catch (err) {
-        setError("Something went wrong loading your dashboard.");
-      } finally {
-        setLoading(false);
-      }
+  function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) {
+    setForm({ ...form, [e.target.name]: e.target.value });
+  }
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setError(null);
+    setLoading(true);
+    try {
+      const res = await fetch("/api/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
+      const data = await res.json();
+      if (!res.ok) { setError(data.error ?? "Registration failed."); return; }
+      setSuccess(true);
+    } catch (err) {
+      setError("Something went wrong. Please try again.");
+    } finally {
+      setLoading(false);
     }
-    fetchEnrollments();
-  }, []);
+  }
 
-  if (loading) return <p className="text-center text-gray-500 mt-24">Loading your courses...</p>;
-  if (error) return <p className="text-center text-red-600 mt-24">{error}</p>;
-
-  return (
-    <div className="max-w-3xl mx-auto px-6 py-12">
-      <h1 className="text-3xl font-bold text-gray-900 mb-8">My Courses</h1>
-
-      {enrollments.length === 0 && (
-        <div className="bg-white border border-gray-200 rounded-xl p-8 text-center">
-          <p className="text-gray-600 mb-4">You haven't enrolled in any courses yet.</p>
+  if (success) {
+    return (
+      <div className="max-w-md mx-auto px-6 py-24 text-center">
+        <div className="bg-white border-2 border-[#14213D]/10 rounded-2xl shadow-sm p-8">
+          <div className="text-4xl mb-2">✅</div>
+          <h1 className="font-[family-name:var(--font-display)] text-xl font-semibold text-[#14213D] mb-2">
+            Account created!
+          </h1>
+          <p className="text-[#14213D]/60 mb-6">You can now log in with your new account.</p>
           <Link
-            href="/courses"
-            className="inline-block bg-gray-900 text-white rounded-lg px-6 py-2.5 font-medium hover:bg-gray-800 transition-colors"
+            href="/login"
+            className="inline-block bg-[#14213D] text-white rounded-full px-6 py-2.5 font-semibold hover:bg-[#1f2f57] transition-colors"
           >
-            Browse courses
+            Go to Login
           </Link>
         </div>
-      )}
+      </div>
+    );
+  }
 
-      <div className="space-y-4">
-        {enrollments.map((enrollment) => (
-          <Link
-            key={enrollment.id}
-            href={`/courses/${enrollment.course.slug}`}
-            className="block bg-white border border-gray-200 rounded-xl p-6 shadow-sm hover:shadow-md hover:border-gray-300 transition-all"
+  return (
+    <div className="max-w-md mx-auto px-6 py-16">
+      <div className="bg-white border-2 border-[#14213D]/10 rounded-2xl shadow-sm p-8">
+        <h1 className="font-[family-name:var(--font-display)] text-2xl font-semibold text-[#14213D] mb-6">
+          Create an account
+        </h1>
+
+        {error && (
+          <p className="text-red-700 text-sm bg-red-50 border border-red-200 rounded-lg px-3 py-2 mb-4">
+            {error}
+          </p>
+        )}
+
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-[#14213D]/80 mb-1">Full name</label>
+            <input
+              name="name"
+              value={form.name}
+              onChange={handleChange}
+              required
+              className="w-full border-2 border-[#14213D]/15 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#F2B705] focus:border-transparent"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-[#14213D]/80 mb-1">Email</label>
+            <input
+              type="email"
+              name="email"
+              value={form.email}
+              onChange={handleChange}
+              required
+              className="w-full border-2 border-[#14213D]/15 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#F2B705] focus:border-transparent"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-[#14213D]/80 mb-1">Password</label>
+            <input
+              type="password"
+              name="password"
+              value={form.password}
+              onChange={handleChange}
+              required
+              minLength={8}
+              className="w-full border-2 border-[#14213D]/15 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#F2B705] focus:border-transparent"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-[#14213D]/80 mb-1">I am a...</label>
+            <select
+              name="role"
+              value={form.role}
+              onChange={handleChange}
+              className="w-full border-2 border-[#14213D]/15 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#F2B705] focus:border-transparent"
+            >
+              <option value="STUDENT">Student</option>
+              <option value="INSTRUCTOR">Instructor</option>
+            </select>
+          </div>
+
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full bg-[#14213D] text-white rounded-full py-3 font-semibold hover:bg-[#1f2f57] transition-colors disabled:opacity-50"
           >
-            <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">
-              {enrollment.course.category}
-            </p>
-            <h2 className="text-lg font-bold text-gray-900 mb-1">
-              {enrollment.course.title}
-            </h2>
-            <p className="text-sm text-gray-500 mb-2">
-              by {enrollment.course.instructor.name}
-            </p>
-            <div className="flex items-center gap-2 text-xs text-gray-400">
-              <span>Enrolled {new Date(enrollment.enrolledAt).toLocaleDateString()}</span>
-              <span>·</span>
-              <span className="inline-block bg-gray-100 text-gray-700 px-2 py-0.5 rounded-full font-medium">
-                {enrollment.status}
-              </span>
-            </div>
+            {loading ? "Creating account..." : "Register"}
+          </button>
+        </form>
+
+        <p className="text-sm text-[#14213D]/60 mt-6 text-center">
+          Already have an account?{" "}
+          <Link href="/login" className="text-[#14213D] font-semibold hover:underline">
+            Log in
           </Link>
-        ))}
+        </p>
       </div>
     </div>
   );

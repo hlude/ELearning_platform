@@ -156,7 +156,6 @@ export default function ManageCoursePage() {
   async function handleAddQuestion(quizId: string, e: React.FormEvent) {
     e.preventDefault();
     const form = getQuestionForm(quizId);
-
     if (!form.text.trim()) { alert("Question text is required."); return; }
     if (form.options.some((o) => !o.text.trim())) { alert("All options need text."); return; }
     if (!form.options.some((o) => o.isCorrect)) { alert("Select which option is correct."); return; }
@@ -170,7 +169,6 @@ export default function ManageCoursePage() {
       });
       const data = await res.json();
       if (!res.ok) { alert(data.error ?? "Failed to add question."); return; }
-
       setQuestionForms({
         ...questionForms,
         [quizId]: { text: "", options: [{ text: "", isCorrect: false }, { text: "", isCorrect: false }] },
@@ -182,112 +180,110 @@ export default function ManageCoursePage() {
     }
   }
 
-  if (loading) return <p className="text-center text-gray-500 mt-24">Loading...</p>;
+  if (loading) return <p className="text-center text-[#14213D]/50 mt-24">Loading...</p>;
   if (error) return <p className="text-center text-red-600 mt-24">{error}</p>;
   if (!course) return null;
 
   return (
     <div className="max-w-3xl mx-auto px-6 py-12">
-      <h1 className="text-3xl font-bold text-gray-900 mb-2">Manage: {course.title}</h1>
-      <p className="text-gray-500 mb-8">Add modules, lessons, and quizzes to build out your course.</p>
+      <h1 className="font-[family-name:var(--font-display)] text-3xl font-semibold text-[#14213D] mb-2">
+        Manage: {course.title}
+      </h1>
+      <p className="text-[#14213D]/50 mb-8">Add modules, lessons, and quizzes to build out your course.</p>
 
-      {/* Add Module */}
-      <div className="bg-white border border-gray-200 rounded-xl p-6 mb-8">
-        <h2 className="font-bold text-gray-900 mb-3">Add a Module</h2>
+      <div className="bg-white border-2 border-[#14213D]/10 rounded-2xl p-6 mb-8">
+        <h2 className="font-semibold text-[#14213D] mb-3">Add a Module</h2>
         <form onSubmit={handleAddModule} className="flex gap-2">
           <input
             value={newModuleTitle}
             onChange={(e) => setNewModuleTitle(e.target.value)}
             placeholder="e.g. Getting Started"
-            className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent"
+            className="flex-1 border-2 border-[#14213D]/15 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#F2B705] focus:border-transparent"
           />
           <button
             type="submit"
             disabled={addingModule}
-            className="bg-gray-900 text-white rounded-lg px-4 py-2 text-sm font-medium hover:bg-gray-800 transition-colors disabled:opacity-50 whitespace-nowrap"
+            className="bg-[#14213D] text-white rounded-full px-4 py-2 text-sm font-semibold hover:bg-[#1f2f57] transition-colors disabled:opacity-50 whitespace-nowrap"
           >
             {addingModule ? "Adding..." : "Add Module"}
           </button>
         </form>
       </div>
 
-      <h2 className="text-xl font-bold text-gray-900 mb-4">Course Content</h2>
-      {course.modules.length === 0 && (
-        <p className="text-gray-500">No modules yet — add one above.</p>
-      )}
+      <h2 className="font-[family-name:var(--font-display)] text-xl font-semibold text-[#14213D] mb-4">
+        Course Content
+      </h2>
+      {course.modules.length === 0 && <p className="text-[#14213D]/50">No modules yet — add one above.</p>}
 
       <div className="space-y-6">
         {course.modules.map((module) => (
-          <div key={module.id} className="bg-white border border-gray-200 rounded-xl p-6">
-            <h3 className="font-bold text-gray-900 mb-3">{module.title}</h3>
+          <div key={module.id} className="bg-white border-2 border-[#14213D]/10 rounded-2xl p-6">
+            <h3 className="font-semibold text-[#14213D] mb-3">{module.title}</h3>
 
             <ul className="space-y-1 mb-4">
               {module.lessons.map((lesson) => (
-                <li key={lesson.id} className="text-sm text-gray-700 flex items-center gap-2">
-                  <span className="w-1.5 h-1.5 bg-gray-400 rounded-full" />
+                <li key={lesson.id} className="text-sm text-[#14213D]/70 flex items-center gap-2">
+                  <span className="w-1.5 h-1.5 bg-[#F2B705] rounded-full" />
                   {lesson.title}
-                  <span className="text-xs text-gray-400">({lesson.type})</span>
+                  <span className="text-xs text-[#14213D]/30">({lesson.type})</span>
                 </li>
               ))}
             </ul>
 
-            {/* Add Lesson */}
-            <div className="border-t border-gray-100 pt-4">
-              <p className="text-sm font-semibold text-gray-700 mb-2">Add a text lesson</p>
+            <div className="border-t border-[#14213D]/10 pt-4">
+              <p className="text-sm font-semibold text-[#14213D]/80 mb-2">Add a text lesson</p>
               <form onSubmit={(e) => handleAddLesson(module.id, e)} className="space-y-2">
                 <input
                   placeholder="Lesson title"
                   value={lessonForms[module.id]?.title ?? ""}
                   onChange={(e) => setLessonForms({ ...lessonForms, [module.id]: { title: e.target.value, textContent: lessonForms[module.id]?.textContent ?? "" } })}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent"
+                  className="w-full border-2 border-[#14213D]/15 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#F2B705] focus:border-transparent"
                 />
                 <textarea
                   placeholder="Lesson content (text)"
                   value={lessonForms[module.id]?.textContent ?? ""}
                   onChange={(e) => setLessonForms({ ...lessonForms, [module.id]: { title: lessonForms[module.id]?.title ?? "", textContent: e.target.value } })}
                   rows={3}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent"
+                  className="w-full border-2 border-[#14213D]/15 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#F2B705] focus:border-transparent"
                 />
                 <button
                   type="submit"
                   disabled={addingLessonFor === module.id}
-                  className="bg-gray-100 text-gray-800 rounded-lg px-4 py-1.5 text-sm font-medium hover:bg-gray-200 transition-colors disabled:opacity-50"
+                  className="bg-[#14213D]/10 text-[#14213D] rounded-full px-4 py-1.5 text-sm font-semibold hover:bg-[#14213D]/20 transition-colors disabled:opacity-50"
                 >
                   {addingLessonFor === module.id ? "Adding..." : "Add Lesson"}
                 </button>
               </form>
             </div>
 
-            {/* Add Quiz */}
-            <div className="border-t border-gray-100 pt-4 mt-4">
-              <p className="text-sm font-semibold text-gray-700 mb-2">Add a quiz</p>
+            <div className="border-t border-[#14213D]/10 pt-4 mt-4">
+              <p className="text-sm font-semibold text-[#14213D]/80 mb-2">Add a quiz</p>
               <form onSubmit={(e) => handleAddQuiz(module.id, e)} className="flex gap-2">
                 <input
                   placeholder="Quiz title, e.g. Module 1 Quiz"
                   value={quizTitleForms[module.id] ?? ""}
                   onChange={(e) => setQuizTitleForms({ ...quizTitleForms, [module.id]: e.target.value })}
-                  className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent"
+                  className="flex-1 border-2 border-[#14213D]/15 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#F2B705] focus:border-transparent"
                 />
                 <button
                   type="submit"
                   disabled={addingQuizFor === module.id}
-                  className="bg-gray-100 text-gray-800 rounded-lg px-4 py-1.5 text-sm font-medium hover:bg-gray-200 transition-colors disabled:opacity-50 whitespace-nowrap"
+                  className="bg-[#14213D]/10 text-[#14213D] rounded-full px-4 py-1.5 text-sm font-semibold hover:bg-[#14213D]/20 transition-colors disabled:opacity-50 whitespace-nowrap"
                 >
                   {addingQuizFor === module.id ? "Adding..." : "Add Quiz"}
                 </button>
               </form>
             </div>
 
-            {/* Add Question forms for each quiz in this module */}
             {module.lessons
               .filter((l) => l.type === "QUIZ" && l.quiz)
               .map((quizLesson) => {
                 const quizId = quizLesson.quiz!.id;
                 const form = getQuestionForm(quizId);
                 return (
-                  <div key={quizId} className="border-t border-gray-100 pt-4 mt-4">
-                    <div className="bg-gray-50 rounded-lg p-4">
-                      <p className="text-sm font-semibold text-gray-700 mb-3">
+                  <div key={quizId} className="border-t border-[#14213D]/10 pt-4 mt-4">
+                    <div className="bg-[#F2B705]/10 rounded-xl p-4">
+                      <p className="text-sm font-semibold text-[#14213D] mb-3">
                         Add a question to "{quizLesson.title}"
                       </p>
                       <form onSubmit={(e) => handleAddQuestion(quizId, e)} className="space-y-2">
@@ -295,7 +291,7 @@ export default function ManageCoursePage() {
                           placeholder="Question text"
                           value={form.text}
                           onChange={(e) => updateQuestionText(quizId, e.target.value)}
-                          className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent"
+                          className="w-full border-2 border-[#14213D]/15 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#F2B705] focus:border-transparent"
                         />
                         {form.options.map((opt, i) => (
                           <div key={i} className="flex items-center gap-2">
@@ -304,13 +300,13 @@ export default function ManageCoursePage() {
                               name={`correct-${quizId}`}
                               checked={opt.isCorrect}
                               onChange={() => setCorrectOption(quizId, i)}
-                              className="w-4 h-4 text-gray-900 focus:ring-gray-900"
+                              className="w-4 h-4 text-[#14213D] focus:ring-[#F2B705]"
                             />
                             <input
                               placeholder={`Option ${i + 1}`}
                               value={opt.text}
                               onChange={(e) => updateOptionText(quizId, i, e.target.value)}
-                              className="flex-1 border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent"
+                              className="flex-1 border-2 border-[#14213D]/15 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#F2B705] focus:border-transparent"
                             />
                           </div>
                         ))}
@@ -318,14 +314,14 @@ export default function ManageCoursePage() {
                           <button
                             type="button"
                             onClick={() => addOptionField(quizId)}
-                            className="text-sm text-gray-600 hover:text-gray-900 font-medium"
+                            className="text-sm text-[#2F6F62] hover:underline font-semibold"
                           >
                             + Add option
                           </button>
                           <button
                             type="submit"
                             disabled={addingQuestionFor === quizId}
-                            className="bg-gray-900 text-white rounded-lg px-4 py-1.5 text-sm font-medium hover:bg-gray-800 transition-colors disabled:opacity-50 ml-auto"
+                            className="bg-[#14213D] text-white rounded-full px-4 py-1.5 text-sm font-semibold hover:bg-[#1f2f57] transition-colors disabled:opacity-50 ml-auto"
                           >
                             {addingQuestionFor === quizId ? "Adding..." : "Add Question"}
                           </button>

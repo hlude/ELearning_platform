@@ -1,33 +1,25 @@
+// Example for Next.js middleware.ts or API response headers
 import { NextResponse } from 'next/server';
-import type { NextRequest } from 'next/server';
-
-const allowedOrigins = [
-  'https://tutorly-visions.lovable.app',
-  'https://id-preview--6f9b4a21-6c52-4265-bf18-f5b99293cc86.lovable.app',
-  // Add your local development origin if needed:
-  'http://localhost:5173',
-  'http://localhost:3000',
-];
+import type { NextRequest } from 'request'; // or 'next/server'
 
 export function middleware(request: NextRequest) {
-  const origin = request.headers.get('origin');
+  const origin = request.headers.get('origin') || '';
+  
+  // Allow Lovable preview/production domains and local development
+  const allowedOrigins = [
+    'https://id-preview--[YOUR-LOVABLE-PROJECT-ID].lovable.app', // Replace with your exact Lovable preview URL domain
+    'https://lovable.dev',
+    'http://localhost:5173',
+    'http://localhost:3000'
+  ];
+
   const response = NextResponse.next();
 
-  // Check if the incoming origin is allowed
-  if (origin && allowedOrigins.includes(origin)) {
-    response.headers.set('Access-Control-Allow-Origin', origin);
-    response.headers.set('Access-Control-Allow-Credentials', 'true');
-    response.headers.set(
-      'Access-Control-Allow-Methods',
-      'GET, POST, PUT, DELETE, OPTIONS, PATCH'
-    );
-    response.headers.set(
-      'Access-Control-Allow-Headers',
-      'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version'
-    );
-  }
+  // If the incoming origin matches or you want a blanket wildcard for preview testing:
+  response.headers.set('Access-Control-Allow-Origin', '*'); // Or use dynamic check for strict security
+  response.headers.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  response.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
 
-  // Handle preflight OPTIONS requests
   if (request.method === 'OPTIONS') {
     return new NextResponse(null, { status: 204, headers: response.headers });
   }

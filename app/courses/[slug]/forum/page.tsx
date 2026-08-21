@@ -24,7 +24,6 @@ export default function ForumListPage() {
       const data = await res.json();
       setThreads(data.threads ?? []);
     } catch (err) {
-      // ignore
     } finally {
       setLoading(false);
     }
@@ -55,43 +54,45 @@ export default function ForumListPage() {
     }
   }
 
-  if (loading) return <p className="text-center text-gray-500 mt-24">Loading discussions...</p>;
+  if (loading) return <p className="text-center text-[#14213D]/50 mt-24">Loading discussions...</p>;
 
   return (
     <div className="max-w-2xl mx-auto px-6 py-12">
-      <h1 className="text-2xl font-bold text-gray-900 mb-1">Discussion</h1>
-      <p className="text-gray-500 mb-6">Ask questions and discuss this course with others.</p>
+      <h1 className="font-[family-name:var(--font-display)] text-2xl font-semibold text-[#14213D] mb-1">
+        Discussion
+      </h1>
+      <p className="text-[#14213D]/50 mb-6">Ask questions and discuss this course with others.</p>
 
-      <div className="bg-white border border-gray-200 rounded-xl p-5 mb-8">
-        <p className="font-semibold text-gray-900 mb-2">Start a new discussion</p>
+      <div className="bg-white border-2 border-[#14213D]/10 rounded-2xl p-5 mb-8">
+        <p className="font-semibold text-[#14213D] mb-2">Start a new discussion</p>
         <form onSubmit={handleCreateThread} className="flex gap-2">
           <input
             value={newTitle}
             onChange={(e) => setNewTitle(e.target.value)}
             placeholder="What's your question?"
-            className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent"
+            className="flex-1 border-2 border-[#14213D]/15 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#F2B705] focus:border-transparent"
           />
           <button
             type="submit"
             disabled={creating}
-            className="bg-gray-900 text-white rounded-lg px-4 py-2 text-sm font-medium hover:bg-gray-800 transition-colors disabled:opacity-50 whitespace-nowrap"
+            className="bg-[#14213D] text-white rounded-full px-4 py-2 text-sm font-semibold hover:bg-[#1f2f57] transition-colors disabled:opacity-50 whitespace-nowrap"
           >
             {creating ? "Posting..." : "Post"}
           </button>
         </form>
       </div>
 
-      {threads.length === 0 && <p className="text-gray-500">No discussions yet — start one above.</p>}
+      {threads.length === 0 && <p className="text-[#14213D]/50">No discussions yet — start one above.</p>}
 
       <div className="space-y-3">
         {threads.map((thread) => (
           <Link
             key={thread.id}
             href={`/forum/${thread.id}`}
-            className="block bg-white border border-gray-200 rounded-xl p-4 hover:border-gray-300 hover:shadow-sm transition-all"
+            className="block bg-white border-2 border-[#14213D]/10 rounded-2xl p-4 hover:border-[#F2B705] hover:shadow-sm transition-all"
           >
-            <p className="font-semibold text-gray-900">{thread.title}</p>
-            <p className="text-sm text-gray-500 mt-1">
+            <p className="font-semibold text-[#14213D]">{thread.title}</p>
+            <p className="text-sm text-[#14213D]/50 mt-1">
               {thread.posts.length} repl{thread.posts.length === 1 ? "y" : "ies"} · {new Date(thread.createdAt).toLocaleDateString()}
             </p>
           </Link>
