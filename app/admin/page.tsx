@@ -111,7 +111,7 @@ export default function AdminPage() {
                 <div>
                   <p className="font-semibold text-[#14213D]">{course.title}</p>
                   <p className="text-sm text-[#14213D]/50">
-                    by {course.instructor.name} ({course.instructor.email})
+                    by {course.instructor?.name ?? "Unknown"} ({course.instructor?.email ?? "—"})
                   </p>
                 </div>
                 <span className="text-xs bg-[#F2B705]/20 text-[#14213D] px-2 py-1 rounded-full font-semibold">
@@ -119,7 +119,7 @@ export default function AdminPage() {
                 </span>
               </div>
               <p className="text-sm text-[#14213D]/50 mb-3">
-                {course._count.enrollments} students · {course._count.reviews} reviews
+                {course._count?.enrollments ?? 0} students · {course._count?.reviews ?? 0} reviews
               </p>
               <div className="flex gap-2 flex-wrap">
                 {course.status !== "PUBLISHED" && (
@@ -181,8 +181,8 @@ export default function AdminPage() {
                       {u.role}
                     </span>
                   </td>
-                  <td className="px-4 py-3 text-[#14213D]/60">{u._count.coursesCreated}</td>
-                  <td className="px-4 py-3 text-[#14213D]/60">{u._count.enrollments}</td>
+                  <td className="px-4 py-3 text-[#14213D]/60">{u._count?.coursesCreated ?? 0}</td>
+                  <td className="px-4 py-3 text-[#14213D]/60">{u._count?.enrollments ?? 0}</td>
                   <td className="px-4 py-3 text-[#14213D]/30">
                     {new Date(u.createdAt).toLocaleDateString()}
                   </td>
