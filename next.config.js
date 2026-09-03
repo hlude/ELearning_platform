@@ -1,4 +1,3 @@
-cat << 'EOF' > next.config.js
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   async headers() {
@@ -17,4 +16,3 @@ const nextConfig = {
 };
 
 module.exports = nextConfig;
-EOF
