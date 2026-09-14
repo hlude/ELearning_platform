@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { getUserFromRequest } from "@/lib/auth";
 
 export async function GET(
   req: NextRequest,
@@ -7,11 +8,12 @@ export async function GET(
 ) {
   try {
     const { slug } = await params;
+    const viewer = await getUserFromRequest(req);
 
     const course = await prisma.course.findUnique({
       where: { slug },
       include: {
-        instructor: { select: { name: true, bio: true } },
+        instructor: { select: { id: true, name: true, bio: true } },
         reviews: {
           select: {
             id: true,
@@ -47,35 +49,26 @@ export async function GET(
           )
         : 0;
 
-    const totalSeconds = course.modules.reduce(
-      (sum, m) => sum + m.lessons.reduce((s, l) => s + (l.durationSec ?? 0), 0),
-      0
-    );
-    const hours = Math.round(totalSeconds / 3600);
+    const isOwner = viewer?.userId === course.instructor.id;
+    const isAdmin = viewer?.role === "ADMIN";
 
     const responseCourse = {
       id: course.id,
       title: course.title,
       slug: course.slug,
       description: course.description,
-      subtitle: course.subtitle,
       thumbnailUrl: course.thumbnailUrl,
       price: course.price,
-      discountPrice: course.discountPrice,
       category: course.category,
-      level: course.level,
-      language: course.language,
-      bestseller: course.bestseller,
-      tags: course.tags,
-      requirements: course.requirements,
-      whatYouLearn: course.whatYouLearn,
+      status: course.status,
       instructor: course.instructor,
       modules: course.modules,
       reviews: course.reviews,
       rating: avgRating,
       reviewCount: totalReviews,
       students: course._count.enrollments,
-      hours,
+      isOwner,
+      isAdmin,
     };
 
     return NextResponse.json({ course: responseCourse });

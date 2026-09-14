@@ -4,11 +4,13 @@ import { getUserFromRequest } from "@/lib/auth";
 
 export async function GET(req: NextRequest) {
   try {
-    const user = await getUserFromRequest(req);
-    if (!user) {
-      return NextResponse.json({ error: "Not logged in." }, { status: 401 });
-    }
-
+ const user = await getUserFromRequest(req);
+if (!user) {
+  return NextResponse.json({ error: "Not logged in." }, { status: 401 });
+}
+if (user.role === "ADMIN") {
+  return NextResponse.json({ error: "Admins don't have student enrollments." }, { status: 403 });
+}
     const enrollments = await prisma.enrollment.findMany({
       where: { studentId: user.userId },
       include: {

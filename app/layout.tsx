@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "EduPlatform — Learn Anything",
+  title: "eLearning Platform — Learn Anything",
   description: "An online learning platform",
 };
 

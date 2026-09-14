@@ -25,8 +25,19 @@ export default function LoginPage() {
         body: JSON.stringify(form),
       });
       const data = await res.json();
-      if (!res.ok) { setError(data.error ?? "Login failed."); return; }
-      router.push("/dashboard");
+      if (!res.ok) {
+  setError(data.error ?? "Login failed.");
+  return;
+}
+
+const role = data.user?.role;
+if (role === "ADMIN") {
+  router.push("/admin");
+} else if (role === "INSTRUCTOR") {
+  router.push("/instructor/analytics");
+} else {
+  router.push("/dashboard");
+}
     } catch (err) {
       setError("Something went wrong. Please try again.");
     } finally {

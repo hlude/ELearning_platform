@@ -73,7 +73,7 @@ export default function CourseCatalogPage() {
     setQuery("");
   }
 
-  if (loading) return <p className="text-center text-[#14213D]/50 mt-24">Loading courses...</p>;
+  if (loading) return <p className="text-center text-[#0A0E1A]/50 mt-24">Loading courses...</p>;
   if (error) return <p className="text-center text-red-600 mt-24">{error}</p>;
 
   return (
@@ -86,10 +86,10 @@ export default function CourseCatalogPage() {
       <div className="flex flex-col lg:flex-row gap-8">
         {/* Sidebar filters */}
         <aside className="lg:w-64 shrink-0">
-          <div className="bg-white border-2 border-[#14213D]/10 rounded-2xl p-5 sticky top-6">
+          <div className="bg-blue border-2 border-[#14213D]/10 rounded-2xl p-5 sticky top-6">
             {categoryNames.length > 0 && (
               <div className="mb-6">
-                <h3 className="text-sm font-semibold text-[#14213D] mb-3">Category</h3>
+                <h3 className="text-sm font-semibold text-[#2F6F62] mb-3">Category</h3>
                 <div className="space-y-2">
                   {categoryNames.map((name) => (
                     <label key={name} className="flex items-center gap-2 text-sm text-[#14213D]/70 cursor-pointer">
@@ -121,7 +121,7 @@ export default function CourseCatalogPage() {
 
             <button
               onClick={resetFilters}
-              className="w-full border-2 border-[#14213D]/15 text-[#14213D] rounded-full py-2 text-sm font-semibold hover:border-[#14213D]/40 transition-colors"
+              className="w-full border-2 border-[#2F6F62]/15 text-[#2F6F62] rounded-full py-2 text-sm font-semibold hover:border-[#14213D]/40 transition-colors"
             >
               Reset filters
             </button>
@@ -172,7 +172,7 @@ export default function CourseCatalogPage() {
                   href={`/courses/${course.slug}`}
                   className="bg-white border-2 border-[#14213D]/10 rounded-2xl p-6 hover:border-[#F2B705] hover:shadow-lg transition-all"
                 >
-                  <p className="text-xs font-semibold text-[#2F6F62] uppercase tracking-wide mb-2">
+                  <p className="text-xs font-semibold text-[#0A0E1A] uppercase tracking-wide mb-2">
                     {course.category}
                   </p>
                   <h2 className="font-[family-name:var(--font-display)] text-lg font-semibold text-[#14213D] mb-1">

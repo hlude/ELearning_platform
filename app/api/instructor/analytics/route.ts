@@ -4,11 +4,13 @@ import { getUserFromRequest } from "@/lib/auth";
 
 export async function GET(req: NextRequest) {
   try {
-    const user = await getUserFromRequest(req);
-    if (!user) {
-      return NextResponse.json({ error: "Not logged in." }, { status: 401 });
-    }
-
+   const user = await getUserFromRequest(req);
+if (!user) {
+  return NextResponse.json({ error: "Not logged in." }, { status: 401 });
+}
+if (user.role !== "INSTRUCTOR") {
+  return NextResponse.json({ error: "Only instructors can view analytics." }, { status: 403 });
+}
     const courses = await prisma.course.findMany({
       where: { instructorId: user.userId },
       include: {

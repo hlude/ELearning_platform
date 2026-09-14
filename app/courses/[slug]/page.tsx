@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 
-type Lesson = { id: string; title: string; type: string; durationSec: number | null };
+type Lesson = { id: string; title: string; type: string; durationSec: number | null; quiz?: { id: string } | null };
 type Module = { id: string; title: string; lessons: Lesson[] };
 type Course = {
   id: string;
@@ -14,6 +14,8 @@ type Course = {
   category: string;
   instructor: { name: string; bio: string | null };
   modules: Module[];
+  isOwner?: boolean;
+  isAdmin?: boolean;
 };
 type Review = {
   id: string;
@@ -159,7 +161,8 @@ export default function CourseDetailPage() {
   return (
     <>
       {/* Hero */}
-      <section className="bg-gradient-to-b from-white to-[#FBF7EF] border-b-2 border-[#14213D]/10">
+
+      <section className="bg-[#0A0E1A]-to-b from-white to-[#FBF7EF] border-b-2 border-[#14213D]/10">
         <div className="max-w-6xl mx-auto px-6 py-10 lg:py-14 grid lg:grid-cols-[1fr_360px] gap-10">
           <div>
             <nav className="flex items-center gap-1.5 text-xs text-[#14213D]/50 mb-4">
@@ -212,20 +215,33 @@ export default function CourseDetailPage() {
                   </p>
                 )}
 
-                {enrolled ? (
-                  <div className="bg-[#2F6F62]/10 border-2 border-[#2F6F62]/20 text-[#2F6F62] rounded-full px-4 py-2.5 font-semibold text-center text-sm">
-                    ✅ Enrolled
-                  </div>
-                ) : (
-                  <button
-                    onClick={handleEnroll}
-                    disabled={enrolling}
-                    className="w-full bg-[#14213D] text-white rounded-full py-3 font-semibold hover:bg-[#1f2f57] transition-colors disabled:opacity-50"
-                  >
-                    {enrolling ? "Enrolling..." : Number(course.price) === 0 ? "Enrol for free" : "Buy now"}
-                  </button>
-                )}
-
+                {course.isOwner ? (
+  <Link
+    href={`/instructor/courses/${slug}/manage`}
+    className="block text-center bg-[#14213D] text-white rounded-full py-3 font-semibold hover:bg-[#1f2f57] transition-colors"
+  >
+    Manage This Course
+  </Link>
+) : course.isAdmin ? (
+  <Link
+    href="/admin"
+    className="block text-center bg-[#14213D]/10 text-[#14213D] rounded-full py-3 font-semibold"
+  >
+    View in Admin Panel
+  </Link>
+) : enrolled ? (
+  <div className="bg-[#2F6F62]/10 border-2 border-[#2F6F62]/20 text-[#2F6F62] rounded-full px-4 py-2.5 font-semibold text-center text-sm">
+    ✅ Enrolled
+  </div>
+) : (
+  <button
+    onClick={handleEnroll}
+    disabled={enrolling}
+    className="w-full bg-[#14213D] text-white rounded-full py-3 font-semibold hover:bg-[#1f2f57] transition-colors disabled:opacity-50"
+  >
+    {enrolling ? "Enrolling..." : Number(course.price) === 0 ? "Enrol for free" : "Buy now"}
+  </button>
+)}
                 <button
                   onClick={handleShare}
                   className="w-full border-2 border-[#14213D]/15 text-[#14213D] rounded-full py-2.5 font-semibold text-sm hover:border-[#14213D]/40 transition-colors"
@@ -299,7 +315,7 @@ export default function CourseDetailPage() {
                   <h3 className="font-semibold text-[#14213D] mb-2">{module.title}</h3>
                   <ul className="space-y-1">
                     {module.lessons.map((lesson) => (
-                      <li key={lesson.id} className="flex items-center gap-2 py-1">
+                      <li key={lesson.id} className="flex items-center gap-2 py-1 flex-wrap">
                         {enrolled && (
                           <input
                             type="checkbox"
@@ -312,6 +328,14 @@ export default function CourseDetailPage() {
                           {lesson.title}
                         </span>
                         <span className="text-xs text-[#14213D]/30">({lesson.type})</span>
+                        {lesson.type === "QUIZ" && lesson.quiz && enrolled && (
+                          <Link
+                            href={`/quizzes/${lesson.quiz.id}`}
+                            className="ml-2 text-xs font-semibold text-[#2F6F62] hover:underline"
+                          >
+                            Take Quiz →
+                          </Link>
+                        )}
                       </li>
                     ))}
                   </ul>
